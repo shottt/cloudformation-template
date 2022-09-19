@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Create web server minimum environment.
+Description: Create server environment.
 
 Metadata:
   AWS::CloudFormation::Interface:
