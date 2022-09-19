@@ -39,7 +39,7 @@ Parameters:
   SystemName:
     Description: Please type the SystemName.
     Type: String
-    Default: keiba-gc
+    Default: sample
   VpcCIDR:
     Description: Please type the VPC CIDR.
     Type: String
