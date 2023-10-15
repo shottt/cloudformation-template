@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "AWS Health API Notification Stack"
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  HealthTopicName:
+    Description: "Enter the SNS topic name for notification when a health event is detected."
+    Type: String
+    Default: ai-health
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # SNS Topic
+  # -------------------------------------
+  # ヘルスイベント通知用
+  HealthTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Ref HealthTopicName
+      TopicName: !Ref HealthTopicName
+  HealthTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AWSHealthSNSPolicy
+            Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action:
+              - sns:Publish
+            Resource: !Ref HealthTopic
+      Topics:
+        - !Ref HealthTopic
+
+  # -------------------------------------
+  # EventBridge
+  # -------------------------------------
+  HealthEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: notice-aws-health
+      Description: "AWS Health によるアカウント固有のイベントを Slack に通知"
+      EventPattern:
+        source:
+          - "aws.health"
+      Targets:
+        - Arn: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${HealthTopicName}
+          Id: Health
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  HealthTopicArn:
+    Value: !Ref HealthTopic
+  HealthEventRuleArn:
+    Value: !GetAtt HealthEventRule.Arn
